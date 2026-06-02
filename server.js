@@ -45,9 +45,17 @@ const contactLimiter = rateLimit({
   message: { success: false, error: 'Too many messages. Please wait a minute.' }
 });
 
-// ── STATIC FILES ─────────────────────────────────────────────────
-// All HTML/CSS/JS lives in ./public/
-app.use(express.static(path.join(__dirname, 'public')));
+// ── STATIC FILES (Sitting in Root) ───────────────────────────────
+// Security shield: Block sensitive backend files from being read by visitors
+app.use((req, res, next) => {
+  const forbidden = ['/server.js', '/orders.json', '/package.json', '/package-lock.json'];
+  if (forbidden.includes(req.path.toLowerCase())) {
+    return res.status(403).send('Access Denied');
+  }
+  next();
+});
+// Serve your HTML/CSS files directly from the main directory
+app.use(express.static(__dirname));
 
 // ── FILE-BASED ORDER STORAGE ─────────────────────────────────────
 // For production: swap with Postgres / MongoDB / Supabase
