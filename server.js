@@ -4,7 +4,7 @@
 //  Handles: checkout submissions, USDT payment tracking, email alerts
 //
 //  ⚠️  SETUP (5 min):
-//  1. cp .env.example .env  →  fill in your values
+//  1. cp .env.example .env  →  qemutzoeqvlbiuze
 //  2. Replace BYBIT_WALLET in public/checkout.html with your TRC-20 address
 //  3. npm install  →  node server.js  (or npm start)
 // ═══════════════════════════════════════════════════════════════════
