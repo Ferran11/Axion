@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: axion
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        generateValue: false
+      - key: GMAIL_USER
+        sync: false
+      - key: GMAIL_PASS
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_KEY
+        generateValue: true
+      - key: ALLOWED_ORIGIN
+        sync: false

@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AXION — AI Operations Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ─── RESET & VARIABLES ─────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px}
+:root{
+  --bg:#060609;
+  --bg2:#0D0B14;
+  --bg3:#13111C;
+  --border:rgba(255,255,255,0.07);
+  --border-hover:rgba(170,255,69,0.25);
+  --accent:#AAFF45;
+  --accent-dim:rgba(170,255,69,0.12);
+  --accent-glow:rgba(170,255,69,0.3);
+  --coral:#FF5757;
+  --coral-dim:rgba(255,87,87,0.12);
+  --text:#F0EDF8;
+  --text2:#9490A3;
+  --text3:#524F60;
+  --font-d:'Syne',sans-serif;
+  --font-b:'DM Sans',sans-serif;
+  --font-m:'JetBrains Mono',monospace;
+  --r:14px;--r-sm:8px;--r-lg:20px;
+  --shadow:0 0 0 1px rgba(255,255,255,0.06),0 20px 60px rgba(0,0,0,0.5);
+}
+body{background:var(--bg);color:var(--text);font-family:var(--font-b);font-size:1rem;line-height:1.6;overflow-x:hidden}
+img{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer;font-family:var(--font-b);border:none;background:none}
+
+/* ─── SCROLLBAR ──────────────────────────────────────── */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+
+/* ─── SELECTION ──────────────────────────────────────── */
+::selection{background:var(--accent);color:#060609}
+
+/* ─── NOISE OVERLAY ──────────────────────────────────── */
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity:.4;mix-blend-mode:overlay;
+}
+
+/* ─── NAVBAR ──────────────────────────────────────────── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:0 40px;height:64px;
+  display:flex;align-items:center;justify-content:space-between;
+  transition:all .3s ease;
+  border-bottom:1px solid transparent;
+}
+nav.scrolled{
+  background:rgba(6,6,9,0.85);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom-color:var(--border);
+}
+.nav-logo{
+  font-family:var(--font-d);font-weight:800;font-size:1.25rem;
+  letter-spacing:-.02em;color:var(--text);
+  display:flex;align-items:center;gap:8px;
+}
+.nav-logo-mark{
+  width:28px;height:28px;background:var(--accent);border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;color:#060609;font-weight:900;
+}
+.nav-links{
+  display:flex;align-items:center;gap:32px;
+  list-style:none;
+}
+.nav-links a{
+  font-size:.875rem;font-weight:400;color:var(--text2);
+  transition:color .2s;letter-spacing:.01em;
+}
+.nav-links a:hover{color:var(--text)}
+.nav-right{display:flex;align-items:center;gap:16px}
+.btn-ghost{
+  font-size:.875rem;color:var(--text2);padding:8px 16px;
+  border-radius:var(--r-sm);transition:all .2s;
+}
+.btn-ghost:hover{color:var(--text);background:rgba(255,255,255,0.05)}
+.btn-primary{
+  font-size:.875rem;font-weight:500;
+  background:var(--accent);color:#060609;
+  padding:9px 20px;border-radius:var(--r-sm);
+  transition:all .2s;letter-spacing:-.01em;
+}
+.btn-primary:hover{background:#BFFF6E;transform:translateY(-1px);box-shadow:0 8px 24px var(--accent-glow)}
+.btn-primary:active{transform:translateY(0)}
+
+
+/* ─── MOBILE NAV ───────────────────────────────── */
+.hamburger{display:none;flex-direction:column;justify-content:center;align-items:center;gap:5px;width:36px;height:36px;border-radius:var(--r-sm);cursor:pointer;background:none;border:none;padding:0;transition:background .2s}
+.hamburger:hover{background:rgba(255,255,255,0.05)}
+.hamburger span{display:block;width:18px;height:1.5px;background:var(--text2);border-radius:2px;transition:all .3s ease}
+.hamburger.open span:nth-child(1){transform:translateY(6.5px) rotate(45deg)}
+.hamburger.open span:nth-child(2){opacity:0;transform:scaleX(0)}
+.hamburger.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg)}
+@media(max-width:1024px){
+  .hamburger{display:flex}
+  .nav-mobile{display:none;position:fixed;top:64px;left:0;right:0;z-index:99;background:rgba(6,6,9,0.97);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid var(--border);padding:16px 24px 24px;flex-direction:column;gap:4px}
+  .nav-mobile.open{display:flex}
+  .nav-mobile a{font-size:1rem;color:var(--text2);padding:13px 0;border-bottom:1px solid var(--border);display:block;letter-spacing:.01em;transition:color .2s}
+  .nav-mobile a:last-child{border-bottom:none;color:var(--accent);font-weight:500;padding-top:20px}
+  .nav-mobile a:hover{color:var(--text)}
+  .nav-right .btn-ghost{display:none}
+}
+
+/* ─── HERO ────────────────────────────────────────────── */
+#hero{
+  min-height:100vh;padding:120px 40px 80px;
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:60px;align-items:center;max-width:1280px;margin:0 auto;
+  position:relative;
+}
+.hero-orb{
+  position:fixed;border-radius:50%;filter:blur(120px);
+  pointer-events:none;z-index:0;
+}
+.orb1{
+  width:600px;height:600px;top:-200px;left:-200px;
+  background:radial-gradient(circle,rgba(170,255,69,0.08) 0%,transparent 70%);
+  animation:orbFloat1 8s ease-in-out infinite;
+}
+.orb2{
+  width:500px;height:500px;top:20%;right:-150px;
+  background:radial-gradient(circle,rgba(255,87,87,0.07) 0%,transparent 70%);
+  animation:orbFloat2 10s ease-in-out infinite;
+}
+.orb3{
+  width:400px;height:400px;bottom:10%;left:30%;
+  background:radial-gradient(circle,rgba(87,87,255,0.05) 0%,transparent 70%);
+  animation:orbFloat3 12s ease-in-out infinite;
+}
+@keyframes orbFloat1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(40px,30px) scale(1.1)}}
+@keyframes orbFloat2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-30px,40px) scale(1.05)}}
+@keyframes orbFloat3{0%,100%{transform:translate(0,0)}50%{transform:translate(20px,-25px)}}
+
+.hero-content{position:relative;z-index:1}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--accent-dim);border:1px solid rgba(170,255,69,0.2);
+  padding:5px 12px 5px 8px;border-radius:100px;
+  font-size:.8rem;font-family:var(--font-m);color:var(--accent);
+  margin-bottom:28px;
+  animation:fadeUp .6s ease both;
+}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s ease infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+h1{
+  font-family:var(--font-d);font-weight:800;font-size:clamp(2.8rem,5vw,4.2rem);
+  line-height:1.05;letter-spacing:-.04em;color:var(--text);
+  margin-bottom:24px;
+  animation:fadeUp .6s .1s ease both;
+}
+h1 em{font-style:normal;color:var(--accent)}
+.hero-sub{
+  font-size:1.1rem;font-weight:300;color:var(--text2);line-height:1.7;
+  max-width:480px;margin-bottom:40px;
+  animation:fadeUp .6s .2s ease both;
+}
+.hero-ctas{
+  display:flex;align-items:center;gap:16px;margin-bottom:40px;
+  animation:fadeUp .6s .3s ease both;
+}
+.btn-hero{
+  font-size:1rem;font-weight:500;background:var(--accent);color:#060609;
+  padding:14px 28px;border-radius:var(--r-sm);
+  transition:all .2s;display:inline-flex;align-items:center;gap:8px;
+}
+.btn-hero:hover{background:#BFFF6E;transform:translateY(-2px);box-shadow:0 12px 32px var(--accent-glow)}
+.btn-hero-ghost{
+  font-size:1rem;color:var(--text2);padding:14px 24px;
+  border-radius:var(--r-sm);border:1px solid var(--border);
+  transition:all .2s;display:inline-flex;align-items:center;gap:8px;
+}
+.btn-hero-ghost:hover{color:var(--text);border-color:rgba(255,255,255,0.2);background:rgba(255,255,255,0.04)}
+.hero-trust{
+  display:flex;align-items:center;gap:12px;
+  font-size:.825rem;color:var(--text3);
+  animation:fadeUp .6s .4s ease both;
+}
+.trust-stars{color:var(--accent);letter-spacing:2px;font-size:1rem}
+.trust-sep{width:1px;height:14px;background:var(--border)}
+
+/* ─── DASHBOARD MOCKUP ───────────────────────────────── */
+.hero-visual{
+  position:relative;z-index:1;
+  animation:fadeUp .8s .2s ease both;
+}
+.dash{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r-lg);overflow:hidden;
+  box-shadow:var(--shadow),0 0 0 1px rgba(170,255,69,0.08);
+  transform:perspective(1000px) rotateY(-4deg) rotateX(2deg);
+  transition:transform .4s ease;
+}
+.dash:hover{transform:perspective(1000px) rotateY(-1deg) rotateX(1deg)}
+.dash-bar{
+  display:flex;align-items:center;gap:8px;
+  padding:12px 16px;background:var(--bg3);
+  border-bottom:1px solid var(--border);
+}
+.dot-r{width:10px;height:10px;border-radius:50%;background:#FF5F57}
+.dot-y{width:10px;height:10px;border-radius:50%;background:#FFBD2E}
+.dot-g{width:10px;height:10px;border-radius:50%;background:#28CA41}
+.dash-title{
+  flex:1;text-align:center;font-size:.75rem;
+  font-family:var(--font-m);color:var(--text3);
+}
+.dash-body{padding:20px}
+.dash-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.kpi{
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:var(--r-sm);padding:12px;
+}
+.kpi-lbl{font-size:.7rem;font-family:var(--font-m);color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em}
+.kpi-val{font-family:var(--font-d);font-weight:700;font-size:1.15rem;color:var(--text);line-height:1.2;margin-bottom:4px}
+.kpi-chg{font-size:.7rem;font-family:var(--font-m)}
+.chg-up{color:var(--accent)}
+.chg-dn{color:var(--coral)}
+
+.chart-wrap{
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:var(--r-sm);padding:14px;margin-bottom:10px;
+}
+.chart-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.chart-label{font-size:.75rem;font-family:var(--font-m);color:var(--text2)}
+.chart-range{font-size:.7rem;font-family:var(--font-m);color:var(--text3)}
+.chart-svg{width:100%;height:70px}
+
+.dash-rows{display:flex;flex-direction:column;gap:1px}
+.dash-row{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 10px;background:var(--bg3);
+  border-radius:6px;border:1px solid transparent;
+  transition:border-color .2s;font-size:.78rem;
+}
+.dash-row:hover{border-color:var(--border)}
+.row-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.row-co{flex:1;font-weight:500;color:var(--text)}
+.row-ev{color:var(--text3);font-family:var(--font-m);font-size:.7rem;width:80px}
+.row-val{font-family:var(--font-m);color:var(--accent);font-size:.75rem}
+.row-badge{
+  font-size:.65rem;font-family:var(--font-m);
+  padding:2px 7px;border-radius:4px;
+}
+.rb-green{background:rgba(170,255,69,0.12);color:var(--accent)}
+.rb-coral{background:var(--coral-dim);color:var(--coral)}
+.rb-blue{background:rgba(87,87,255,0.15);color:#8888FF}
+
+/* ─── LOGO BAR ────────────────────────────────────────── */
+#logos{padding:32px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);overflow:hidden}
+.logos-label{text-align:center;font-size:.78rem;font-family:var(--font-m);color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:24px}
+.marquee-wrap{overflow:hidden;position:relative}
+.marquee-wrap::before,.marquee-wrap::after{
+  content:'';position:absolute;top:0;width:120px;height:100%;z-index:1;
+}
+.marquee-wrap::before{left:0;background:linear-gradient(to right,var(--bg),transparent)}
+.marquee-wrap::after{right:0;background:linear-gradient(to left,var(--bg),transparent)}
+.marquee{display:flex;gap:60px;animation:marquee 22s linear infinite;width:max-content}
+.marquee-item{
+  font-family:var(--font-d);font-weight:700;font-size:1.05rem;
+  color:var(--text3);letter-spacing:-.02em;white-space:nowrap;
+  transition:color .2s;
+}
+.marquee-item:hover{color:var(--text2)}
+@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ─── SECTION COMMON ──────────────────────────────────── */
+section{padding:100px 40px}
+.container{max-width:1200px;margin:0 auto}
+.section-eyebrow{
+  font-family:var(--font-m);font-size:.75rem;color:var(--accent);
+  letter-spacing:.12em;text-transform:uppercase;margin-bottom:16px;
+  display:flex;align-items:center;gap:8px;
+}
+.section-eyebrow::before{content:'';display:block;width:20px;height:1px;background:var(--accent)}
+.section-title{
+  font-family:var(--font-d);font-weight:800;font-size:clamp(2rem,3.5vw,3rem);
+  letter-spacing:-.04em;line-height:1.1;color:var(--text);margin-bottom:16px;
+}
+.section-sub{font-size:1.05rem;font-weight:300;color:var(--text2);max-width:500px;line-height:1.7}
+
+/* ─── FADE ANIMATION ──────────────────────────────────── */
+.reveal{opacity:0;transform:translateY(24px);transition:all .7s cubic-bezier(.16,1,.3,1)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* ─── FEATURES ────────────────────────────────────────── */
+#features{background:var(--bg)}
+.features-hd{max-width:560px;margin-bottom:64px}
+.bento{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:auto auto;gap:16px}
+.bento-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:28px;
+  transition:all .3s ease;position:relative;overflow:hidden;
+}
+.bento-card::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 80% 20%,rgba(170,255,69,0.04),transparent 60%);
+  opacity:0;transition:opacity .3s;
+}
+.bento-card:hover{border-color:var(--border-hover);transform:translateY(-4px);box-shadow:0 20px 60px rgba(0,0,0,0.3),0 0 0 1px rgba(170,255,69,0.1)}
+.bento-card:hover::before{opacity:1}
+.bento-card.large{grid-column:span 2}
+.bento-icon{
+  width:42px;height:42px;border-radius:10px;
+  background:var(--accent-dim);border:1px solid rgba(170,255,69,0.2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;margin-bottom:20px;
+}
+.bento-title{
+  font-family:var(--font-d);font-weight:700;font-size:1.1rem;
+  letter-spacing:-.02em;margin-bottom:10px;color:var(--text);
+}
+.bento-desc{font-size:.9rem;font-weight:300;color:var(--text2);line-height:1.65}
+.bento-tag{
+  display:inline-block;margin-top:16px;font-size:.72rem;
+  font-family:var(--font-m);padding:4px 10px;border-radius:100px;
+  background:var(--accent-dim);color:var(--accent);border:1px solid rgba(170,255,69,0.15);
+}
+.bento-visual{
+  margin-top:20px;padding:16px;background:var(--bg3);
+  border-radius:var(--r-sm);border:1px solid var(--border);
+}
+.mini-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.mini-bar-row:last-child{margin-bottom:0}
+.mini-label{font-size:.7rem;font-family:var(--font-m);color:var(--text3);width:60px;flex-shrink:0}
+.mini-bar-bg{flex:1;height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden}
+.mini-bar-fill{height:100%;border-radius:3px;background:var(--accent)}
+.mini-val{font-size:.7rem;font-family:var(--font-m);color:var(--text3);width:30px;text-align:right}
+
+/* ─── STATS ────────────────────────────────────────────── */
+#stats{
+  background:linear-gradient(180deg,var(--bg) 0%,var(--bg2) 50%,var(--bg) 100%);
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  padding:80px 40px;
+}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border)}
+.stat-cell{
+  background:var(--bg);padding:48px 40px;text-align:center;
+  position:relative;overflow:hidden;
+}
+.stat-cell::after{
+  content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);
+  width:40%;height:1px;background:linear-gradient(to right,transparent,var(--accent),transparent);
+  opacity:0;transition:opacity .3s;
+}
+.stat-cell:hover::after{opacity:1}
+.stat-num{
+  font-family:var(--font-d);font-weight:800;font-size:clamp(2.5rem,4vw,3.5rem);
+  letter-spacing:-.04em;color:var(--accent);line-height:1;margin-bottom:10px;display:block;
+}
+.stat-label{font-size:.875rem;font-weight:400;color:var(--text2)}
+
+/* ─── HOW IT WORKS ────────────────────────────────────── */
+#how{background:var(--bg)}
+.how-hd{text-align:center;margin-bottom:80px}
+.how-hd .section-eyebrow{justify-content:center}
+.how-hd .section-eyebrow::before{display:none}
+.how-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:0;position:relative;
+}
+.how-grid::before{
+  content:'';position:absolute;top:48px;left:calc(16.666% + 24px);
+  right:calc(16.666% + 24px);height:1px;
+  background:linear-gradient(to right,var(--accent-dim),var(--border),var(--accent-dim));
+}
+.how-step{padding:0 32px;position:relative;text-align:center}
+.step-num{
+  width:56px;height:56px;border-radius:50%;
+  background:var(--accent-dim);border:1px solid rgba(170,255,69,0.3);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-m);font-size:.9rem;font-weight:500;color:var(--accent);
+  margin:0 auto 28px;position:relative;z-index:1;background:var(--bg);
+}
+.step-title{
+  font-family:var(--font-d);font-weight:700;font-size:1.15rem;
+  letter-spacing:-.02em;color:var(--text);margin-bottom:12px;
+}
+.step-desc{font-size:.9rem;font-weight:300;color:var(--text2);line-height:1.7}
+
+/* ─── TESTIMONIALS ────────────────────────────────────── */
+#testimonials{background:var(--bg2)}
+.test-hd{margin-bottom:64px}
+.test-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.test-card{
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:32px;
+  transition:all .3s;position:relative;
+}
+.test-card:hover{border-color:var(--border-hover);transform:translateY(-4px)}
+.test-quote{
+  font-family:'DM Sans',sans-serif;font-size:2.5rem;font-weight:800;
+  color:var(--accent);line-height:1;margin-bottom:16px;opacity:.6;
+}
+.test-text{font-size:.95rem;font-weight:300;color:var(--text2);line-height:1.7;margin-bottom:24px}
+.test-author{display:flex;align-items:center;gap:12px;padding-top:20px;border-top:1px solid var(--border)}
+.test-avatar{
+  width:38px;height:38px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-d);font-weight:700;font-size:.875rem;color:#060609;
+}
+.test-name{font-weight:500;font-size:.875rem;color:var(--text)}
+.test-role{font-size:.78rem;color:var(--text3);font-family:var(--font-m)}
+
+/* ─── PRICING ─────────────────────────────────────────── */
+#pricing{background:var(--bg)}
+.pricing-hd{text-align:center;margin-bottom:64px}
+.pricing-hd .section-eyebrow{justify-content:center}
+.pricing-hd .section-eyebrow::before{display:none}
+.pricing-toggle{
+  display:flex;align-items:center;gap:12px;justify-content:center;
+  font-size:.875rem;color:var(--text2);margin-top:20px;
+}
+.toggle{
+  position:relative;width:44px;height:24px;background:var(--bg3);
+  border-radius:12px;border:1px solid var(--border);cursor:pointer;
+  transition:background .2s;
+}
+.toggle.on{background:var(--accent)}
+.toggle-knob{
+  position:absolute;top:3px;left:3px;width:16px;height:16px;
+  border-radius:50%;background:var(--text3);
+  transition:all .2s;
+}
+.toggle.on .toggle-knob{left:23px;background:#060609}
+.save-badge{
+  background:var(--accent-dim);color:var(--accent);border:1px solid rgba(170,255,69,0.2);
+  padding:2px 8px;border-radius:100px;font-size:.7rem;font-family:var(--font-m);
+}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:start}
+.pricing-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:32px;transition:all .3s;
+}
+.pricing-card:hover{transform:translateY(-4px)}
+.pricing-card.featured{
+  background:var(--bg3);
+  border-color:rgba(170,255,69,0.35);
+  box-shadow:0 0 0 1px rgba(170,255,69,0.1),0 24px 64px rgba(0,0,0,0.4),0 0 80px rgba(170,255,69,0.06);
+  transform:translateY(-8px);
+}
+.pricing-card.featured:hover{transform:translateY(-12px)}
+.pricing-tier-badge{
+  display:inline-block;font-size:.7rem;font-family:var(--font-m);
+  padding:4px 10px;border-radius:100px;margin-bottom:20px;
+  background:var(--accent-dim);color:var(--accent);
+  border:1px solid rgba(170,255,69,0.2);
+}
+.pricing-tier{font-family:var(--font-d);font-weight:700;font-size:1.1rem;color:var(--text);margin-bottom:8px}
+.pricing-desc{font-size:.85rem;color:var(--text2);margin-bottom:28px;line-height:1.6}
+.pricing-amount{
+  display:flex;align-items:flex-start;gap:4px;margin-bottom:8px;
+}
+.pricing-cur{font-size:1.2rem;font-weight:700;color:var(--text2);margin-top:6px;font-family:var(--font-d)}
+.pricing-num{
+  font-family:var(--font-d);font-weight:800;font-size:3rem;
+  letter-spacing:-.04em;color:var(--text);line-height:1;
+}
+.pricing-period{font-size:.8rem;color:var(--text3);margin-top:auto;padding-bottom:2px;font-family:var(--font-m)}
+.pricing-sub{font-size:.78rem;color:var(--text3);margin-bottom:28px;font-family:var(--font-m)}
+.pricing-divider{height:1px;background:var(--border);margin-bottom:24px}
+.pricing-features{list-style:none;display:flex;flex-direction:column;gap:12px;margin-bottom:32px}
+.pf-item{display:flex;align-items:flex-start;gap:10px;font-size:.875rem;color:var(--text2)}
+.pf-check{color:var(--accent);flex-shrink:0;margin-top:1px;font-weight:700}
+.pf-x{color:var(--text3);flex-shrink:0}
+.pf-item.dim{color:var(--text3)}
+.btn-pricing{
+  width:100%;padding:13px;border-radius:var(--r-sm);font-size:.9rem;font-weight:500;
+  transition:all .2s;text-align:center;display:block;
+}
+.btn-pricing-ghost{
+  border:1px solid var(--border);color:var(--text2);
+}
+.btn-pricing-ghost:hover{border-color:rgba(255,255,255,0.2);color:var(--text);background:rgba(255,255,255,0.04)}
+.btn-pricing-primary{
+  background:var(--accent);color:#060609;font-weight:600;
+}
+.btn-pricing-primary:hover{background:#BFFF6E;box-shadow:0 8px 24px var(--accent-glow)}
+.btn-pricing-outline{
+  border:1px solid rgba(170,255,69,0.3);color:var(--accent);
+}
+.btn-pricing-outline:hover{background:var(--accent-dim);border-color:rgba(170,255,69,0.5)}
+
+/* ─── FINAL CTA ────────────────────────────────────────── */
+#cta{
+  background:var(--bg2);border-top:1px solid var(--border);
+  text-align:center;padding:120px 40px;
+  position:relative;overflow:hidden;
+}
+#cta::before{
+  content:'';position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:600px;height:600px;border-radius:50%;
+  background:radial-gradient(circle,rgba(170,255,69,0.07) 0%,transparent 65%);
+  pointer-events:none;
+}
+.cta-inner{position:relative;z-index:1}
+.cta-title{
+  font-family:var(--font-d);font-weight:800;font-size:clamp(2.5rem,5vw,4rem);
+  letter-spacing:-.04em;line-height:1.05;color:var(--text);margin-bottom:20px;
+}
+.cta-title span{color:var(--accent)}
+.cta-sub{font-size:1.05rem;font-weight:300;color:var(--text2);max-width:480px;margin:0 auto 40px;line-height:1.7}
+.cta-btns{display:flex;justify-content:center;gap:16px;flex-wrap:wrap}
+.cta-note{margin-top:16px;font-size:.8rem;font-family:var(--font-m);color:var(--text3)}
+
+/* ─── FOOTER ────────────────────────────────────────────── */
+footer{
+  background:var(--bg);border-top:1px solid var(--border);
+  padding:64px 40px 32px;
+}
+.footer-grid{
+  display:grid;grid-template-columns:2fr 1fr 1fr 1fr;
+  gap:40px;max-width:1200px;margin:0 auto 60px;
+}
+.footer-brand .nav-logo{margin-bottom:16px;font-size:1.1rem}
+.footer-tagline{font-size:.875rem;font-weight:300;color:var(--text2);line-height:1.6;max-width:240px;margin-bottom:24px}
+.footer-social{display:flex;gap:12px}
+.social-btn{
+  width:36px;height:36px;border-radius:var(--r-sm);
+  background:var(--bg3);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.8rem;color:var(--text3);transition:all .2s;
+}
+.social-btn:hover{border-color:var(--border-hover);color:var(--accent)}
+.footer-col h4{
+  font-family:var(--font-d);font-weight:600;font-size:.875rem;
+  color:var(--text);margin-bottom:20px;letter-spacing:-.01em;
+}
+.footer-links{list-style:none;display:flex;flex-direction:column;gap:10px}
+.footer-links a{font-size:.875rem;font-weight:300;color:var(--text3);transition:color .2s}
+.footer-links a:hover{color:var(--text)}
+.footer-bottom{
+  max-width:1200px;margin:0 auto;
+  padding-top:24px;border-top:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;
+}
+.footer-copy{font-size:.8rem;font-family:var(--font-m);color:var(--text3)}
+.footer-legal{display:flex;gap:24px}
+.footer-legal a{font-size:.8rem;font-family:var(--font-m);color:var(--text3);transition:color .2s}
+.footer-legal a:hover{color:var(--text2)}
+
+/* ─── RESPONSIVE ─────────────────────────────────────── */
+@media(max-width:1024px){
+  #hero{grid-template-columns:1fr;gap:60px;padding:100px 32px 60px}
+  .hero-visual{order:-1}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .bento{grid-template-columns:repeat(2,1fr)}
+  .bento-card.large{grid-column:span 2}
+  .how-grid{grid-template-columns:1fr;gap:40px}
+  .how-grid::before{display:none}
+  .test-grid,.pricing-grid{grid-template-columns:1fr}
+  .footer-grid{grid-template-columns:1fr 1fr}
+  .pricing-card.featured{transform:none}
+  nav{padding:0 24px}
+  .nav-links{display:none}
+}
+@media(max-width:640px){
+  section{padding:72px 24px}
+  #hero{padding:100px 24px 60px}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .bento{grid-template-columns:1fr}
+  .bento-card.large{grid-column:span 1}
+  .footer-grid{grid-template-columns:1fr}
+  .footer-bottom{flex-direction:column;text-align:center}
+  .hero-ctas{flex-direction:column;align-items:flex-start}
+  .btn-hero,.btn-hero-ghost{width:100%;justify-content:center}
+  .dash-kpis{grid-template-columns:1fr 1fr}
+  h1{font-size:2.5rem}
+}
+</style>
+</head>
+<body>
+
+<!-- ── NAV ───────────────────────────────────────────── -->
+<nav id="navbar">
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-mark">A</div>
+    AXION
+  </a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#testimonials">Customers</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="premium.html" class="btn-ghost">Sign in</a>
+    <a href="checkout.html?plan=growth&billing=annual" class="btn-primary">Start free →</a>
+  <button class="hamburger" id="hamburger" aria-label="Toggle navigation" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- MOBILE NAV -->
+<div class="nav-mobile" id="navMobile">
+  <a href="#features" class="mobile-link">Features</a>
+  <a href="#how" class="mobile-link">How it works</a>
+  <a href="#pricing" class="mobile-link">Pricing</a>
+  <a href="#testimonials" class="mobile-link">Customers</a>
+  <a href="checkout.html?plan=growth&billing=annual">Start free trial →</a>
+</div>
+
+<!-- ── BACKGROUND ORBS ───────────────────────────────── -->
+<div class="hero-orb orb1" aria-hidden="true"></div>
+<div class="hero-orb orb2" aria-hidden="true"></div>
+<div class="hero-orb orb3" aria-hidden="true"></div>
+
+<!-- ── HERO ──────────────────────────────────────────── -->
+<section id="hero">
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      Announcing AXION 2.0 — AI deal intelligence
+    </div>
+    <h1>Close more.<br><em>Automate</em> the rest.</h1>
+    <p class="hero-sub">AXION connects your entire revenue stack and uses AI to surface what matters — so your team focuses on closing, not scrambling through spreadsheets.</p>
+    <div class="hero-ctas">
+      <a href="checkout.html?plan=growth&billing=annual" class="btn-hero">Start free trial →</a>
+      <a href="#how" class="btn-hero-ghost">See how it works ↓</a>
+    </div>
+    <div class="hero-trust">
+      <span class="trust-stars">★★★★★</span>
+      <span class="trust-sep"></span>
+      <span>Trusted by <strong style="color:var(--text)">2,400+</strong> revenue teams</span>
+    </div>
+  </div>
+
+  <!-- Dashboard mockup -->
+  <div class="hero-visual">
+    <div class="dash" role="img" aria-label="AXION dashboard showing revenue metrics and pipeline activity">
+      <div class="dash-bar">
+        <div class="dot-r"></div><div class="dot-y"></div><div class="dot-g"></div>
+        <div class="dash-title">axion.io — Revenue Dashboard</div>
+      </div>
+      <div class="dash-body">
+        <div class="dash-kpis">
+          <div class="kpi">
+            <div class="kpi-lbl">MRR</div>
+            <div class="kpi-val">$248.1K</div>
+            <div class="kpi-chg chg-up">↑ 24.8%</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-lbl">Active users</div>
+            <div class="kpi-val">12,481</div>
+            <div class="kpi-chg chg-up">↑ 8.2%</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-lbl">Churn</div>
+            <div class="kpi-val">1.4%</div>
+            <div class="kpi-chg chg-dn">↓ 0.3pp</div>
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <div class="chart-hd">
+            <span class="chart-label">Revenue · 12 months</span>
+            <span class="chart-range">Jan–Dec 2024</span>
+          </div>
+          <svg class="chart-svg" viewBox="0 0 380 70" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#AAFF45" stop-opacity="0.18"/>
+                <stop offset="100%" stop-color="#AAFF45" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <path d="M0,60 L30,56 L60,52 L90,48 L120,44 L150,40 L180,32 L210,26 L240,28 L270,18 L300,13 L330,9 L360,5 L380,3" fill="none" stroke="#AAFF45" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M0,60 L30,56 L60,52 L90,48 L120,44 L150,40 L180,32 L210,26 L240,28 L270,18 L300,13 L330,9 L360,5 L380,3 L380,70 L0,70 Z" fill="url(#cg)"/>
+            <circle cx="380" cy="3" r="3" fill="#AAFF45"/>
+          </svg>
+        </div>
+        <div class="dash-rows">
+          <div class="dash-row">
+            <span class="row-dot" style="background:#AAFF45"></span>
+            <span class="row-co">Stripe Inc.</span>
+            <span class="row-ev">Renewed</span>
+            <span class="row-val">$36k/yr</span>
+            <span class="row-badge rb-green">closed</span>
+          </div>
+          <div class="dash-row">
+            <span class="row-dot" style="background:#8888FF"></span>
+            <span class="row-co">Linear HQ</span>
+            <span class="row-ev">In review</span>
+            <span class="row-val">$24k/yr</span>
+            <span class="row-badge rb-blue">proposal</span>
+          </div>
+          <div class="dash-row">
+            <span class="row-dot" style="background:#FF5757"></span>
+            <span class="row-co">Notion Corp</span>
+            <span class="row-ev">At risk</span>
+            <span class="row-val">$18k/yr</span>
+            <span class="row-badge rb-coral">⚠ action</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── LOGO BAR ───────────────────────────────────────── -->
+<section id="logos" style="padding:40px 0">
+  <p class="logos-label">Trusted by teams at</p>
+  <div class="marquee-wrap">
+    <div class="marquee" aria-hidden="true">
+      <span class="marquee-item">Stripe</span>
+      <span class="marquee-item">Linear</span>
+      <span class="marquee-item">Vercel</span>
+      <span class="marquee-item">Notion</span>
+      <span class="marquee-item">Figma</span>
+      <span class="marquee-item">Loom</span>
+      <span class="marquee-item">Atlassian</span>
+      <span class="marquee-item">HubSpot</span>
+      <span class="marquee-item">Intercom</span>
+      <span class="marquee-item">Segment</span>
+      <!-- duplicate for infinite loop -->
+      <span class="marquee-item">Stripe</span>
+      <span class="marquee-item">Linear</span>
+      <span class="marquee-item">Vercel</span>
+      <span class="marquee-item">Notion</span>
+      <span class="marquee-item">Figma</span>
+      <span class="marquee-item">Loom</span>
+      <span class="marquee-item">Atlassian</span>
+      <span class="marquee-item">HubSpot</span>
+      <span class="marquee-item">Intercom</span>
+      <span class="marquee-item">Segment</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── FEATURES ──────────────────────────────────────── -->
+<section id="features">
+  <div class="container">
+    <div class="features-hd reveal">
+      <div class="section-eyebrow">Platform</div>
+      <h2 class="section-title">Everything your revenue team needs.<br>Nothing it doesn't.</h2>
+      <p class="section-sub">Six core capabilities engineered to eliminate friction and surface the deals that matter most.</p>
+    </div>
+    <div class="bento">
+      <div class="bento-card large reveal">
+        <div class="bento-icon">🧠</div>
+        <div class="bento-title">AI Deal Intelligence</div>
+        <div class="bento-desc">AXION's AI analyses every interaction across email, calls, and CRM to score deal health in real time — flagging blockers before they cost you the close. No manual data entry.</div>
+        <div class="bento-tag">NEW in 2.0</div>
+        <div class="bento-visual">
+          <div class="mini-bar-row">
+            <span class="mini-label">Acme Corp</span>
+            <div class="mini-bar-bg"><div class="mini-bar-fill" style="width:88%"></div></div>
+            <span class="mini-val">88</span>
+          </div>
+          <div class="mini-bar-row">
+            <span class="mini-label">Linear</span>
+            <div class="mini-bar-bg"><div class="mini-bar-fill" style="width:72%"></div></div>
+            <span class="mini-val">72</span>
+          </div>
+          <div class="mini-bar-row">
+            <span class="mini-label">Notion</span>
+            <div class="mini-bar-bg"><div class="mini-bar-fill" style="width:41%;background:var(--coral)"></div></div>
+            <span class="mini-val" style="color:var(--coral)">41</span>
+          </div>
+        </div>
+      </div>
+      <div class="bento-card reveal">
+        <div class="bento-icon">⚡</div>
+        <div class="bento-title">Pipeline Automation</div>
+        <div class="bento-desc">Build no-code workflows that move deals forward automatically — follow-up sequences, stage transitions, and task creation without lifting a finger.</div>
+      </div>
+      <div class="bento-card reveal">
+        <div class="bento-icon">📊</div>
+        <div class="bento-title">Real-Time Analytics</div>
+        <div class="bento-desc">Live dashboards showing exactly what's moving, what's stuck, and what your forecast actually looks like — not what the rep told you.</div>
+      </div>
+      <div class="bento-card reveal">
+        <div class="bento-icon">🔗</div>
+        <div class="bento-title">Native Integrations</div>
+        <div class="bento-desc">Connect to Salesforce, HubSpot, Gmail, Slack, Zoom, and 40+ tools in minutes. AXION lives where your team already works.</div>
+      </div>
+      <div class="bento-card reveal">
+        <div class="bento-icon">📅</div>
+        <div class="bento-title">Revenue Forecasting</div>
+        <div class="bento-desc">AI-powered forecasts with ±4% accuracy. Know your quarter before it ends — and adjust pipeline before it's too late.</div>
+      </div>
+      <div class="bento-card reveal">
+        <div class="bento-icon">🔒</div>
+        <div class="bento-title">Enterprise Security</div>
+        <div class="bento-desc">SOC 2 Type II certified. SSO, RBAC, and full audit logs included on every plan. Your data never trains our models.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── STATS ──────────────────────────────────────────── -->
+<section id="stats">
+  <div class="stats-grid">
+    <div class="stat-cell reveal">
+      <span class="stat-num" data-target="2400" data-suffix="+">0</span>
+      <span class="stat-label">Teams using AXION globally</span>
+    </div>
+    <div class="stat-cell reveal">
+      <span class="stat-num" data-target="2.8" data-prefix="$" data-suffix="B">$0</span>
+      <span class="stat-label">Revenue tracked in the last 30 days</span>
+    </div>
+    <div class="stat-cell reveal">
+      <span class="stat-num" data-target="94" data-suffix="%">0</span>
+      <span class="stat-label">Customer retention rate, last 12 months</span>
+    </div>
+    <div class="stat-cell reveal">
+      <span class="stat-num" data-target="3.2" data-suffix="x">0</span>
+      <span class="stat-label">Faster average deal close time</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ───────────────────────────────────── -->
+<section id="how">
+  <div class="container">
+    <div class="how-hd reveal">
+      <div class="section-eyebrow">Process</div>
+      <h2 class="section-title">Up and running in 15 minutes.</h2>
+      <p class="section-sub" style="margin:0 auto">No implementation consultant. No six-week onboarding. Just connect, learn, and close.</p>
+    </div>
+    <div class="how-grid">
+      <div class="how-step reveal">
+        <div class="step-num">01</div>
+        <h3 class="step-title">Connect your stack</h3>
+        <p class="step-desc">Plug in your CRM, email, calendar, and communication tools in under 15 minutes. One-click integrations for the tools your team already uses.</p>
+      </div>
+      <div class="how-step reveal">
+        <div class="step-num">02</div>
+        <h3 class="step-title">AI maps your pipeline</h3>
+        <p class="step-desc">AXION's AI reads every deal signal — emails, call recordings, activity gaps — and builds a real-time health score for every opportunity in your pipeline.</p>
+      </div>
+      <div class="how-step reveal">
+        <div class="step-num">03</div>
+        <h3 class="step-title">Close with confidence</h3>
+        <p class="step-desc">Get AI-generated next steps for every deal, accurate revenue forecasts, and automated follow-ups — so nothing falls through the cracks ever again.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── TESTIMONIALS ───────────────────────────────────── -->
+<section id="testimonials">
+  <div class="container">
+    <div class="test-hd reveal">
+      <div class="section-eyebrow">Customers</div>
+      <h2 class="section-title">Teams that close more are using AXION.</h2>
+    </div>
+    <div class="test-grid">
+      <div class="test-card reveal">
+        <div class="test-quote">"</div>
+        <p class="test-text">We were tracking deals in a spreadsheet and wondering why we kept missing forecast. AXION didn't just fix that — it showed us deals we didn't even know were at risk. Q3 was our best quarter ever.</p>
+        <div class="test-author">
+          <div class="test-avatar" style="background:var(--accent)">SH</div>
+          <div>
+            <div class="test-name">Sarah Henriksen</div>
+            <div class="test-role">VP of Revenue · Meridian Labs</div>
+          </div>
+        </div>
+      </div>
+      <div class="test-card reveal">
+        <div class="test-quote">"</div>
+        <p class="test-text">The AI deal scoring changed how I run my 1-on-1s. Instead of asking reps to update Salesforce, I can see exactly where every deal stands and why. My team stopped hating pipeline reviews.</p>
+        <div class="test-author">
+          <div class="test-avatar" style="background:#8888FF">MO</div>
+          <div>
+            <div class="test-name">Marcus O'Brien</div>
+            <div class="test-role">Head of Sales · Fieldline</div>
+          </div>
+        </div>
+      </div>
+      <div class="test-card reveal">
+        <div class="test-quote">"</div>
+        <p class="test-text">We evaluated six revenue intelligence tools. AXION was the only one where the AI felt like it actually understood our business instead of showing us another pretty chart with no context.</p>
+        <div class="test-author">
+          <div class="test-avatar" style="background:var(--coral)">JP</div>
+          <div>
+            <div class="test-name">James Park</div>
+            <div class="test-role">CEO · Cortex Systems</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PRICING ────────────────────────────────────────── -->
+<section id="pricing">
+  <div class="container">
+    <div class="pricing-hd reveal">
+      <div class="section-eyebrow">Pricing</div>
+      <h2 class="section-title">Simple. Transparent. No surprises.</h2>
+      <p class="section-sub" style="margin:0 auto">All plans include a 14-day free trial. No credit card required to start.</p>
+      <div class="pricing-toggle">
+        <span>Monthly</span>
+        <div class="toggle on" id="billing-toggle" role="switch" aria-checked="true" tabindex="0"></div>
+        <span>Annual</span>
+        <span class="save-badge">Save 20%</span>
+      </div>
+    </div>
+    <div class="pricing-grid">
+      <div class="pricing-card reveal">
+        <div class="pricing-tier-badge">Starter</div>
+        <div class="pricing-tier">For small teams</div>
+        <div class="pricing-desc">Everything you need to get started and close your first deals with AI assistance.</div>
+        <div class="pricing-amount">
+          <span class="pricing-cur">$</span>
+          <span class="pricing-num" id="price-starter">39</span>
+          <span class="pricing-period">/mo</span>
+        </div>
+        <div class="pricing-sub">per seat · billed annually</div>
+        <div class="pricing-divider"></div>
+        <ul class="pricing-features">
+          <li class="pf-item"><span class="pf-check">✓</span>Up to 5 seats</li>
+          <li class="pf-item"><span class="pf-check">✓</span>CRM sync (Salesforce, HubSpot)</li>
+          <li class="pf-item"><span class="pf-check">✓</span>Basic deal scoring</li>
+          <li class="pf-item"><span class="pf-check">✓</span>Email integration</li>
+          <li class="pf-item"><span class="pf-check">✓</span>Standard dashboards</li>
+          <li class="pf-item dim"><span class="pf-x">–</span>AI deal intelligence</li>
+          <li class="pf-item dim"><span class="pf-x">–</span>Revenue forecasting</li>
+        </ul>
+        <a href="checkout.html?plan=starter&billing=annual" id="btn-checkout-starter" class="btn-pricing btn-pricing-ghost">Start free trial</a>
+      </div>
+      <div class="pricing-card featured reveal">
+        <div class="pricing-tier-badge">Growth — Most Popular</div>
+        <div class="pricing-tier">For scaling teams</div>
+        <div class="pricing-desc">Full AI capabilities for teams serious about predictable revenue and accelerated close rates.</div>
+        <div class="pricing-amount">
+          <span class="pricing-cur">$</span>
+          <span class="pricing-num" id="price-growth">119</span>
+          <span class="pricing-period">/mo</span>
+        </div>
+        <div class="pricing-sub">per seat · billed annually</div>
+        <div class="pricing-divider"></div>
+        <ul class="pricing-features">
+          <li class="pf-item"><span class="pf-check">✓</span>Unlimited seats</li>
+          <li class="pf-item"><span class="pf-check">✓</span>All CRM + comm integrations</li>
+          <li class="pf-item"><span class="pf-check">✓</span><strong>AI deal intelligence</strong></li>
+          <li class="pf-item"><span class="pf-check">✓</span><strong>Revenue forecasting</strong></li>
+          <li class="pf-item"><span class="pf-check">✓</span>Pipeline automation</li>
+          <li class="pf-item"><span class="pf-check">✓</span>Custom dashboards</li>
+          <li class="pf-item"><span class="pf-check">✓</span>Priority support (4h SLA)</li>
+        </ul>
+        <a href="checkout.html?plan=growth&billing=annual" id="btn-checkout-growth" class="btn-pricing btn-pricing-primary">Start free trial →</a>
+      </div>
+      <div class="pricing-card reveal">
+        <div class="pricing-tier-badge">Enterprise</div>
+        <div class="pricing-tier">For large organisations</div>
+        <div class="pricing-desc">Custom contracts, dedicated success managers, and security controls built for enterprise requirements.</div>
+        <div class="pricing-amount">
+          <span class="pricing-num" style="font-size:2.2rem">Custom</span>
+        </div>
+        <div class="pricing-sub">volume pricing available</div>
+        <div class="pricing-divider"></div>
+        <ul class="pricing-features">
+          <li class="pf-item"><span class="pf-check">✓</span>Everything in Growth</li>
+          <li class="pf-item"><span class="pf-check">✓</span>SSO & advanced RBAC</li>
+          <li class="pf-item"><span class="pf-check">✓</span>Dedicated CSM</li>
+          <li class="pf-item"><span class="pf-check">✓</span>Custom data retention</li>
+          <li class="pf-item"><span class="pf-check">✓</span>SOC 2 Type II + BAA</li>
+          <li class="pf-item"><span class="pf-check">✓</span>99.99% uptime SLA</li>
+          <li class="pf-item"><span class="pf-check">✓</span>Onboarding & training</li>
+        </ul>
+        <a href="mailto:sultan@axion.ai?subject=AXION%20Enterprise%20Inquiry" class="btn-pricing btn-pricing-outline">Talk to sales →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ────────────────────────────────────────────── -->
+<section id="cta">
+  <div class="cta-inner reveal">
+    <p class="section-eyebrow" style="justify-content:center"><span></span>Get started<span></span></p>
+    <h2 class="cta-title">Your next quarter<br>starts <span>right now.</span></h2>
+    <p class="cta-sub">Join 2,400+ revenue teams using AXION to close faster, forecast better, and never let a deal slip through the cracks again.</p>
+    <div class="cta-btns">
+      <a href="checkout.html?plan=growth&billing=annual" class="btn-hero">Start free trial →</a>
+      <a href="#features" class="btn-hero-ghost">Explore features</a>
+    </div>
+    <p class="cta-note">14-day free trial · No credit card required · Cancel any time</p>
+  </div>
+</section>
+
+<!-- ── FOOTER ─────────────────────────────────────────── -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="#" class="nav-logo">
+        <div class="nav-logo-mark">A</div>
+        AXION
+      </a>
+      <p class="footer-tagline">The AI operations layer built for revenue teams that can't afford to slow down.</p>
+      <div class="footer-social">
+        <a href="#" class="social-btn" aria-label="Twitter">𝕏</a>
+        <a href="#" class="social-btn" aria-label="LinkedIn">in</a>
+        <a href="#" class="social-btn" aria-label="GitHub">⌥</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Product</h4>
+      <ul class="footer-links">
+        <li><a href="#">Features</a></li>
+        <li><a href="#">Integrations</a></li>
+        <li><a href="#">Changelog</a></li>
+        <li><a href="#">Roadmap</a></li>
+        <li><a href="#">API</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <ul class="footer-links">
+        <li><a href="#">About</a></li>
+        <li><a href="#">Blog</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Press</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Resources</h4>
+      <ul class="footer-links">
+        <li><a href="#">Documentation</a></li>
+        <li><a href="#">Help center</a></li>
+        <li><a href="#">Status</a></li>
+        <li><a href="#">Security</a></li>
+        <li><a href="#">Community</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-copy">© 2025 AXION Technologies Inc. All rights reserved.</span>
+    <div class="footer-legal">
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+      <a href="#">Cookies</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ── SCRIPTS ────────────────────────────────────────── -->
+<script>
+// ── Navbar scroll effect
+const navbar=document.getElementById("navbar");
+window.addEventListener("scroll",()=>{
+  navbar.classList.toggle("scrolled",window.scrollY>20);
+},{passive:true});
+
+// ── Scroll reveal with stagger
+const reveals=document.querySelectorAll(".reveal");
+const revealObs=new IntersectionObserver((entries)=>{
+  entries.forEach((e,i)=>{
+    if(e.isIntersecting){
+      const delay=e.target.closest(".bento")||e.target.closest(".pricing-grid")||e.target.closest(".test-grid")?
+        [...e.target.parentElement.children].indexOf(e.target)*80:0;
+      setTimeout(()=>e.target.classList.add("visible"),delay);
+      revealObs.unobserve(e.target);
+    }
+  });
+},{threshold:.12,rootMargin:"0px 0px -40px 0px"});
+reveals.forEach(el=>revealObs.observe(el));
+
+// ── Stat counter animation
+function animateCount(el,target,prefix="",suffix="",isFloat=false){
+  const dur=1800,start=performance.now();
+  const initial=0;
+  function step(ts){
+    const p=Math.min((ts-start)/dur,1);
+    const ease=1-Math.pow(1-p,4);
+    const val=initial+(target-initial)*ease;
+    el.textContent=prefix+(isFloat?val.toFixed(1):Math.round(val))+suffix;
+    if(p<1)requestAnimationFrame(step);
+    else el.textContent=prefix+target+suffix;
+  }
+  requestAnimationFrame(step);
+}
+const statNums=document.querySelectorAll(".stat-num[data-target]");
+const statObs=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      const el=e.target;
+      const t=parseFloat(el.dataset.target);
+      const pre=el.dataset.prefix||"";
+      const suf=el.dataset.suffix||"";
+      animateCount(el,t,pre,suf,t%1!==0);
+      statObs.unobserve(el);
+    }
+  });
+},{threshold:.5});
+statNums.forEach(n=>statObs.observe(n));
+
+// ── Billing toggle
+const toggle=document.getElementById("billing-toggle");
+let annual=true;
+const prices={starter:{annual:39,monthly:49},growth:{annual:119,monthly:149}};
+toggle.addEventListener("click",()=>{
+  annual=!annual;
+  toggle.classList.toggle("on",annual);
+  toggle.setAttribute("aria-checked",annual);
+  document.getElementById("price-starter").textContent=annual?prices.starter.annual:prices.starter.monthly;
+  document.getElementById("price-growth").textContent=annual?prices.growth.annual:prices.growth.monthly;
+  const b=annual?"annual":"monthly";
+  const s=document.getElementById("btn-checkout-starter");
+  const g=document.getElementById("btn-checkout-growth");
+  if(s)s.href="checkout.html?plan=starter&billing="+b;
+  if(g)g.href="checkout.html?plan=growth&billing="+b;
+});
+toggle.addEventListener("keydown",e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();toggle.click();}});
+
+// ── Mobile nav toggle
+const hamburger=document.getElementById('hamburger');
+const navMobile=document.getElementById('navMobile');
+if(hamburger){
+  hamburger.addEventListener('click',()=>{
+    const open=navMobile.classList.toggle('open');
+    hamburger.classList.toggle('open',open);
+    hamburger.setAttribute('aria-expanded',open);
+    document.body.style.overflow=open?'hidden':'';
+  });
+  navMobile.querySelectorAll('a').forEach(a=>{
+    a.addEventListener('click',()=>{
+      navMobile.classList.remove('open');
+      hamburger.classList.remove('open');
+      hamburger.setAttribute('aria-expanded',false);
+      document.body.style.overflow='';
+    });
+  });
+}
+
+// ── Smooth scroll for nav links
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener("click",e=>{
+    const t=document.querySelector(a.getAttribute("href"));
+    if(t){e.preventDefault();t.scrollIntoView({behavior:"smooth",block:"start"});}
+  });
+});
+</script>
+</body>
+</html>
